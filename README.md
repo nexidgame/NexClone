@@ -12,15 +12,28 @@ Aplikasi dibuka lewat `LauncherApps` (cadangan: perintah lintas profil).
 Dua salinan Nex Clone terpasang: satu di profil utama (yang Anda pakai) dan satu di profil klon
 (tanpa ikon, hanya menerima perintah lewat cross-profile intent `com.nex.clone.action.PROFILE_OP`).
 
+## Alur pemakaian
+1. **Pertama kali dibuka**, Nex Clone langsung membuat profil kerja (layar persetujuan sistem akan muncul sekali).
+2. **Beranda** menampilkan semua aplikasi bawaan ponsel. Yang sudah ada di profil kerja diberi lencana koper.
+   Ketuk = buka (salinan profil kerja bila ada, kalau tidak aplikasi aslinya).
+3. **Memasukkan aplikasi ke profil kerja**: ketuk **＋** lalu pilih aplikasi (bisa ubah nama/ikon dulu), atau
+   **tahan** ikon di beranda lalu pilih **Masukkan ke profil kerja**.
+4. **Di dalam profil kerja** (tab Kerja di peluncur), Nex Clone hanya menampilkan dua menu:
+   **Perbaiki** (jalankan ulang penyiapan) dan **Hapus profil kerja**.
+
 ## Fitur (mengikuti desain referensi)
-- Layar utama: kisi aplikasi klon, pencarian "Semua aplikasi yang dikloning", tombol ＋, ilustrasi kosong.
-- **Pilih aplikasi**: riwayat penambahan + "Hapus catatan", daftar A–Z dengan indeks huruf, pencarian.
-- **Ubah nama/ikon** sebelum mengkloning (tombol *Klon*) dan sesudahnya.
-- Menu tahan ikon klon: **Laporan Bug**, **Pintasan Desktop**, **Ubah nama/ikon**, **Perbaiki satu kunci**, **Hapus**.
-- **Pusat pengguna**: Manajemen pemberitahuan, Manajemen tugas (hentikan klon), Kunci aplikasi (sidik jari/PIN),
-  Ruang Privasi (sembunyikan klon di balik verifikasi), Pertanyaan Umum, Umpan balik, Berbagi,
-  Bahasa (Indonesia/English), Tentang Kami.
+- Pilih aplikasi: riwayat penambahan + "Hapus catatan", daftar A–Z dengan indeks huruf, pencarian.
+- Menu tahan pada aplikasi di profil kerja: Laporan Bug, Pintasan Desktop, Ubah nama/ikon, Perbaiki satu kunci, Hapus.
+- Pusat pengguna: Manajemen pemberitahuan, Manajemen tugas, Kunci aplikasi, Ruang Privasi, Pertanyaan Umum,
+  Umpan balik, Berbagi, Bahasa (Indonesia/English), Tentang Kami.
+- Pesan galat spesifik bila perintah ke profil kerja tidak sampai (NOT_FOUND / CANCELED / FAILED).
 - Tidak disertakan: VIP/langganan, Kode F, Migrasi VIP (butuh server & penagihan).
+
+## Jika muncul "profil kerja belum siap" / gagal memasukkan aplikasi
+Perintah dari profil utama dikirim ke Nex Clone di profil kerja lewat cross-profile intent. Bila tidak sampai:
+- Buka Nex Clone di **tab Kerja** lalu ketuk **Perbaiki** (menjalankan ulang pendaftaran izin lintas profil).
+- Setelah memperbarui APK, penyiapan profil yang sudah ada diperbaiki otomatis (penerima `MY_PACKAGE_REPLACED`).
+- Izin lintas profil kini dipasang dua arah (`FLAG_PARENT_CAN_ACCESS_MANAGED | FLAG_MANAGED_CAN_ACCESS_PARENT`).
 
 ## Build
 Butuh JDK 17 dan Android SDK 36.

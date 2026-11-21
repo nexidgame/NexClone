@@ -70,6 +70,12 @@ object CloneStore {
         write(all().filter { it.pkg != pkg })
     }
 
+    fun flag(key: String): Boolean = sp.getBoolean("flag_$key", false)
+
+    fun setFlag(key: String, value: Boolean) {
+        sp.edit { putBoolean("flag_$key", value) }
+    }
+
     // ---- riwayat "Sejarah Tambahkan Rekor" ----
     fun history(): List<String> {
         val raw = sp.getString("history", null) ?: return emptyList()

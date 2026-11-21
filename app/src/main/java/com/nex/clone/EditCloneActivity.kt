@@ -11,6 +11,7 @@ import com.nex.clone.core.CloneStore
 import com.nex.clone.core.IconUtils
 import com.nex.clone.core.ProfileOpClient
 import com.nex.clone.core.ProfileOps
+import com.nex.clone.core.message
 import com.nex.clone.databinding.ActivityEditBinding
 import com.nex.clone.ui.Busy
 import com.nex.clone.ui.applySystemBarsPadding
@@ -48,11 +49,7 @@ class EditCloneActivity : AppCompatActivity() {
             return
         }
         edit = intent.getBooleanExtra(EXTRA_EDIT, false)
-        entry = CloneStore.get(pkg)
-        if (edit && entry == null) {
-            finish()
-            return
-        }
+        entry = CloneStore.get(pkg) ?: if (edit) CloneEntry(pkg = pkg) else null
 
         b = ActivityEditBinding.inflate(layoutInflater)
         setContentView(b.root)
@@ -109,16 +106,16 @@ class EditCloneActivity : AppCompatActivity() {
         }
 
         val busy = Busy.show(this, R.string.cloning)
-        ops.run(ProfileOps.OP_CLONE, listOf(pkg)) { ok ->
+        ops.run(ProfileOps.OP_CLONE, listOf(pkg)) { r ->
             busy.dismiss()
-            if (ok) {
+            if (r.isOk) {
                 CloneStore.upsert(CloneEntry(pkg = pkg, name = customName, iconFile = pickedFile))
                 CloneStore.addHistory(pkg)
                 Toast.makeText(this, R.string.clone_done, Toast.LENGTH_SHORT).show()
                 setResult(RESULT_OK)
                 finish()
             } else {
-                Toast.makeText(this, R.string.clone_failed, Toast.LENGTH_LONG).show()
+                Toast.makeText(this, r.message(this, R.string.clone_failed), Toast.LENGTH_LONG).show()
             }
         }
     }

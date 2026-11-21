@@ -35,9 +35,19 @@ object LaunchHelper {
             }
         }
         // Cadangan: minta instance di profil klon membuka aplikasinya sendiri.
-        ops.run(ProfileOps.OP_LAUNCH, listOf(pkg)) { ok ->
-            if (!ok) Toast.makeText(a, R.string.launch_failed, Toast.LENGTH_LONG).show()
+        ops.run(ProfileOps.OP_LAUNCH, listOf(pkg)) { r ->
+            if (!r.isOk) Toast.makeText(a, r.message(a, R.string.launch_failed), Toast.LENGTH_LONG).show()
             onDone()
+        }
+    }
+
+    /** Membuka aplikasi aslinya di profil utama (bukan salinan di profil kerja). */
+    fun launchOriginal(a: FragmentActivity, pkg: String) {
+        val i = a.packageManager.getLaunchIntentForPackage(pkg)
+        if (i == null) {
+            Toast.makeText(a, R.string.launch_failed, Toast.LENGTH_LONG).show()
+        } else {
+            a.startActivity(i)
         }
     }
 }

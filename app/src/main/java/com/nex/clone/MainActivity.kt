@@ -2,7 +2,6 @@ package com.nex.clone
 
 import android.app.admin.DevicePolicyManager
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -35,11 +34,17 @@ import com.nex.clone.core.ProfileSetup
 import com.nex.clone.core.Profiles
 import com.nex.clone.core.Shortcuts
 import com.nex.clone.core.Support
+import com.nex.clone.core.message
 import com.nex.clone.databinding.ActivityMainBinding
 import com.nex.clone.ui.Busy
 import com.nex.clone.ui.applySystemBarsPadding
 import com.nex.clone.ui.dp
 
+/**
+ * Beranda: semua aplikasi di ponsel (bawaan). Yang sudah ada di profil kerja diberi lencana koper.
+ * Ketuk = buka (salinan profil kerja bila ada, kalau tidak aplikasi aslinya). Tahan = menu.
+ * Saat pertama kali dibuka, profil kerja langsung disiapkan.
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var b: ActivityMainBinding
@@ -47,7 +52,7 @@ class MainActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
 
     private val adapter = CloneGridAdapter(
-        onClick = { launchClone(it) },
+        onClick = { open(it) },
         onLong = { item, anchor -> showMenu(item, anchor) },
     )
 
@@ -91,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         b.fab.setOnClickListener {
             if (profileReady) reload.launch(Intent(this, PickAppActivity::class.java)) else confirmSetup()
         }
-        b.btnSetup.setOnClickListener { confirmSetup() }
+        b.btnSetup.setOnClickListener { startSetup() }
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -103,6 +108,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+
+        if (savedInstanceState == null) b.root.post { maybeAutoSetup() }
     }
 
     override fun onResume() {
@@ -110,12 +117,21 @@ class MainActivity : AppCompatActivity() {
         refresh()
     }
 
+    /** Pertama kali masuk aplikasi: langsung buat profil kerja (sekali saja; berikutnya lewat tombol). */
+    private fun maybeAutoSetup() {
+        if (CloneStore.flag(FLAG_AUTO_SETUP)) return
+        CloneStore.setFlag(FLAG_AUTO_SETUP, true)
+        if (Profiles.cloneUser(this) != null) return
+        Toast.makeText(this, R.string.setup_auto, Toast.LENGTH_SHORT).show()
+        startSetup()
+    }
+
     // ------------------------------------------------------------------ daftar
 
     private fun refresh() {
         Thread {
             val ready = Profiles.cloneUser(this) != null
-            val items = CloneItems.load(this, false)
+            val items = CloneItems.loadHome(this)
             runOnUiThread {
                 if (isDestroyed) return@runOnUiThread
                 profileReady = ready
@@ -130,7 +146,7 @@ class MainActivity : AppCompatActivity() {
         adapter.submit(list)
         b.cardSetup.visibility = if (!profileReady) View.VISIBLE else View.GONE
         b.empty.visibility = if (profileReady && all.isEmpty()) View.VISIBLE else View.GONE
-        b.list.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
+        b.list.visibility = if (!profileReady || list.isEmpty()) View.GONE else View.VISIBLE
         b.dotMenu.visibility = if (!profileReady) View.VISIBLE else View.GONE
     }
 
@@ -149,19 +165,34 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun launchClone(item: CloneItem) {
-        LaunchHelper.launch(this, ops, item.entry.pkg)
+    private fun open(item: CloneItem) {
+        if (item.inProfile) {
+            LaunchHelper.launch(this, ops, item.entry.pkg)
+        } else {
+            LaunchHelper.launchOriginal(this, item.entry.pkg)
+        }
     }
 
     // ------------------------------------------------------------------ menu tahan
 
     private fun showMenu(item: CloneItem, anchor: View) {
         val v = layoutInflater.inflate(R.layout.popup_clone_menu, null)
-        val pw = PopupWindow(v, dp(236), ViewGroup.LayoutParams.WRAP_CONTENT, true).apply {
+        val pw = PopupWindow(v, dp(250), ViewGroup.LayoutParams.WRAP_CONTENT, true).apply {
             elevation = dp(12).toFloat()
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }
         val pkg = item.entry.pkg
+
+        // Aplikasi yang belum di profil kerja: hanya "Masukkan ke profil kerja".
+        v.findViewById<View>(R.id.menuAdd).visibility = if (item.inProfile) View.GONE else View.VISIBLE
+        for (id in intArrayOf(R.id.menuBug, R.id.menuShortcut, R.id.menuEdit, R.id.menuRepair, R.id.menuDelete)) {
+            v.findViewById<View>(id).visibility = if (item.inProfile) View.VISIBLE else View.GONE
+        }
+
+        v.findViewById<View>(R.id.menuAdd).setOnClickListener {
+            pw.dismiss()
+            addToProfile(item)
+        }
         v.findViewById<View>(R.id.menuBug).setOnClickListener {
             pw.dismiss()
             Support.sendBugReport(this, pkg)
@@ -189,6 +220,28 @@ class MainActivity : AppCompatActivity() {
         pw.showAsDropDown(anchor, dp(8), 0)
     }
 
+    /** Memasukkan aplikasi ke profil kerja langsung dari beranda. */
+    private fun addToProfile(item: CloneItem) {
+        if (!profileReady) {
+            Toast.makeText(this, R.string.need_profile, Toast.LENGTH_LONG).show()
+            confirmSetup()
+            return
+        }
+        val pkg = item.entry.pkg
+        val busy = Busy.show(this, R.string.cloning)
+        ops.run(ProfileOps.OP_CLONE, listOf(pkg)) { r ->
+            busy.dismiss()
+            if (r.isOk) {
+                CloneStore.upsert(item.entry)
+                CloneStore.addHistory(pkg)
+                Toast.makeText(this, R.string.clone_done, Toast.LENGTH_SHORT).show()
+                refresh()
+            } else {
+                Toast.makeText(this, r.message(this, R.string.clone_failed), Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
     private fun pinShortcut(item: CloneItem) {
         val bmp = item.icon?.toBitmap(192, 192)
         val ok = bmp != null && Shortcuts.pin(this, item.entry.pkg, item.label, bmp)
@@ -197,9 +250,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun repair(pkg: String) {
         val busy = Busy.show(this, R.string.repairing)
-        ops.run(ProfileOps.OP_REPAIR, listOf(pkg)) { ok ->
+        ops.run(ProfileOps.OP_REPAIR, listOf(pkg)) { r ->
             busy.dismiss()
-            Toast.makeText(this, if (ok) R.string.repair_done else R.string.repair_failed, Toast.LENGTH_LONG).show()
+            val msg = if (r.isOk) getString(R.string.repair_done) else r.message(this, R.string.repair_failed)
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
             refresh()
         }
     }
@@ -215,20 +269,20 @@ class MainActivity : AppCompatActivity() {
 
     private fun delete(item: CloneItem) {
         val busy = Busy.show(this, R.string.deleting)
-        ops.run(ProfileOps.OP_DELETE, listOf(item.entry.pkg)) { ok ->
+        ops.run(ProfileOps.OP_DELETE, listOf(item.entry.pkg)) { r ->
             busy.dismiss()
-            if (ok) {
+            if (r.isOk) {
                 IconUtils.delete(this, item.entry.iconFile)
                 CloneStore.remove(item.entry.pkg)
                 Toast.makeText(this, R.string.delete_done, Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, R.string.delete_failed, Toast.LENGTH_LONG).show()
+                Toast.makeText(this, r.message(this, R.string.delete_failed), Toast.LENGTH_LONG).show()
             }
             refresh()
         }
     }
 
-    // ------------------------------------------------------------------ penyiapan ruang klon
+    // ------------------------------------------------------------------ penyiapan profil kerja
 
     private fun confirmSetup() {
         MaterialAlertDialogBuilder(this)
@@ -281,19 +335,25 @@ class MainActivity : AppCompatActivity() {
         handler.post(tick)
     }
 
-    /** Memastikan penerima perintah di profil klon sudah aktif sebelum dipakai. */
+    /** Memastikan penerima perintah di profil kerja sudah aktif; mencoba sampai ~50 detik. */
     private fun pingUntilReady(busy: AlertDialog, attempt: Int) {
-        ops.run(ProfileOps.OP_PING, emptyList()) { ok ->
-            if (ok) {
-                busy.dismiss()
-                Toast.makeText(this, R.string.setup_done, Toast.LENGTH_LONG).show()
-                refresh()
-            } else if (attempt < 8) {
-                handler.postDelayed({ pingUntilReady(busy, attempt + 1) }, 1500)
-            } else {
-                busy.dismiss()
-                Toast.makeText(this, R.string.setup_incomplete, Toast.LENGTH_LONG).show()
-                refresh()
+        ops.run(ProfileOps.OP_PING, emptyList()) { r ->
+            when {
+                r.isOk -> {
+                    busy.dismiss()
+                    Toast.makeText(this, R.string.setup_done, Toast.LENGTH_LONG).show()
+                    refresh()
+                }
+                attempt < 25 -> handler.postDelayed({ pingUntilReady(busy, attempt + 1) }, 2000)
+                else -> {
+                    busy.dismiss()
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle(R.string.setup_incomplete_title)
+                        .setMessage(getString(R.string.setup_incomplete) + "\n\n(" + r.name + ")")
+                        .setPositiveButton(R.string.ok, null)
+                        .show()
+                    refresh()
+                }
             }
         }
     }
@@ -301,5 +361,9 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         handler.removeCallbacksAndMessages(null)
         super.onDestroy()
+    }
+
+    companion object {
+        private const val FLAG_AUTO_SETUP = "auto_setup_asked"
     }
 }

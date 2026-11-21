@@ -10,6 +10,6 @@ class NexCloneApp : Application() {
         super.onCreate()
         CloneStore.init(this)
         // Proses yang berjalan di dalam profil klon: aktifkan penerima perintah, sembunyikan layar utama.
-        if (Profiles.inManagedProfile(this)) ProfileSetup.applyComponentStates(this)
+        if (Profiles.inManagedProfile(this)) ProfileSetup.run(this)
     }
 }

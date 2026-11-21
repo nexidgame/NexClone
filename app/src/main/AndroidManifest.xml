@@ -83,6 +83,27 @@
         </activity>
 
         <!-- Nonaktif di profil utama; diaktifkan hanya di dalam profil klon (lihat ProfileSetup) -->
+        <!-- Layar Nex Clone di DALAM profil kerja (Perbaiki / Hapus profil kerja). Diaktifkan hanya di sana. -->
+        <activity
+            android:name=".admin.ProfileHomeActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Memperbaiki penyiapan profil kerja yang sudah ada setelah APK diperbarui -->
+        <receiver
+            android:name=".admin.PackageReplacedReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name=".admin.ProfileOpActivity"
             android:enabled="false"

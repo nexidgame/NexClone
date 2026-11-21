@@ -68,6 +68,14 @@ class ProfileOpActivity : Activity() {
             finishWith(true)
             return
         }
+        val isSystem = runCatching {
+            (packageManager.getApplicationInfo(pkg, 0).flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0
+        }.getOrDefault(false)
+        if (isSystem) {
+            // Aplikasi sistem (mis. Chrome, Play Store) tidak bisa di-uninstall: cukup disembunyikan dari profil.
+            finishWith(runCatching { dpm.setApplicationHidden(admin, pkg, true) }.getOrDefault(false))
+            return
+        }
         pendingDelete = pkg
         try {
             startActivityForResult(

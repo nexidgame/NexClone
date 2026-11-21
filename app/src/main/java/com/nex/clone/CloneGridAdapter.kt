@@ -32,6 +32,7 @@ class CloneGridAdapter(
         holder.vb.imgIcon.setImageDrawable(item.icon)
         holder.vb.tvLabel.text = item.label
         holder.vb.imgLock.visibility = if (item.entry.locked) View.VISIBLE else View.GONE
+        holder.vb.imgProfile.visibility = if (item.inProfile) View.VISIBLE else View.GONE
         holder.vb.root.alpha = if (item.missing) 0.45f else 1f
         holder.vb.root.setOnClickListener { onClick(item) }
         holder.vb.root.setOnLongClickListener {

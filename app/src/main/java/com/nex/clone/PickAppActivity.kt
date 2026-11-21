@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.nex.clone.core.CloneStore
+import com.nex.clone.core.Profiles
 import com.nex.clone.databinding.ActivityPickBinding
 import com.nex.clone.databinding.ItemPickAppBinding
 import com.nex.clone.databinding.ItemPickHistoryBinding
@@ -95,7 +96,9 @@ class PickAppActivity : AppCompatActivity() {
         Thread {
             val pm = packageManager
             val launch = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-            val cloned = CloneStore.all().map { it.pkg }.toSet()
+            val user = Profiles.cloneUser(this)
+            val inProfile = user?.let { Profiles.snapshot(this, it) }?.keys
+            val cloned: Set<String> = inProfile ?: CloneStore.all().map { it.pkg }.toSet()
             val list = pm.queryIntentActivities(launch, 0)
                 .asSequence()
                 .filter { it.activityInfo.packageName != packageName }

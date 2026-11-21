@@ -14,6 +14,7 @@ import com.nex.clone.core.CloneItems
 import com.nex.clone.core.CloneStore
 import com.nex.clone.core.ProfileOpClient
 import com.nex.clone.core.ProfileOps
+import com.nex.clone.core.message
 import com.nex.clone.databinding.ActivityManageBinding
 import com.nex.clone.databinding.ItemManageBinding
 import com.nex.clone.ui.applySystemBarsPadding
@@ -71,14 +72,15 @@ class ManageActivity : AppCompatActivity() {
     }
 
     private fun stop(pkgs: List<String>) {
-        ops.run(ProfileOps.OP_STOP, pkgs) { ok ->
-            Toast.makeText(this, if (ok) R.string.tasks_stopped else R.string.op_failed, Toast.LENGTH_SHORT).show()
+        ops.run(ProfileOps.OP_STOP, pkgs) { r ->
+            val msg = if (r.isOk) getString(R.string.tasks_stopped) else r.message(this, R.string.op_failed)
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun openNotificationSettings(pkg: String) {
-        ops.run(ProfileOps.OP_NOTIF, listOf(pkg)) { ok ->
-            if (!ok) Toast.makeText(this, R.string.op_failed, Toast.LENGTH_SHORT).show()
+        ops.run(ProfileOps.OP_NOTIF, listOf(pkg)) { r ->
+            if (!r.isOk) Toast.makeText(this, r.message(this, R.string.op_failed), Toast.LENGTH_SHORT).show()
         }
     }
 
