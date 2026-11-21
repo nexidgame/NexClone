@@ -14,6 +14,11 @@ object ProfileOps {
     const val EXTRA_OP = "op"
     const val EXTRA_PKGS = "pkgs"
     const val EXTRA_OK = "ok"
+    const val EXTRA_APKS = "apks"
+    const val EXTRA_REASON = "reason"
+
+    /** Nilai EXTRA_REASON khusus: instalasi dilanjutkan manual lewat Play Store di profil kerja. */
+    const val REASON_OPENED_STORE = "OPENED_STORE"
 
     const val OP_PING = "ping"
     const val OP_CLONE = "clone"
@@ -56,9 +61,14 @@ fun OpResult.message(ctx: Context, failedRes: Int): String = when (this) {
 class ProfileOpClient(activity: ComponentActivity) {
     private var callback: ((OpResult) -> Unit)? = null
 
+    /** Alasan/detail dari profil kerja untuk perintah terakhir (untuk diagnosis), bila ada. */
+    var lastReason: String? = null
+        private set
+
     private val launcher = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
         val cb = callback
         callback = null
+        lastReason = r.data?.getStringExtra(ProfileOps.EXTRA_REASON)
         val result = when {
             r.resultCode != Activity.RESULT_OK -> OpResult.CANCELED
             r.data?.getBooleanExtra(ProfileOps.EXTRA_OK, false) == true -> OpResult.OK
@@ -67,10 +77,13 @@ class ProfileOpClient(activity: ComponentActivity) {
         cb?.invoke(result)
     }
 
-    fun run(op: String, pkgs: List<String>, onDone: (OpResult) -> Unit) {
+    /** [apks]: jalur APK sumber (base + split) dari profil utama, dipakai untuk instal cadangan. */
+    fun run(op: String, pkgs: List<String>, apks: List<String> = emptyList(), onDone: (OpResult) -> Unit) {
         val i = Intent(ProfileOps.ACTION)
             .putExtra(ProfileOps.EXTRA_OP, op)
             .putExtra(ProfileOps.EXTRA_PKGS, pkgs.toTypedArray())
+            .putExtra(ProfileOps.EXTRA_APKS, apks.toTypedArray())
+        lastReason = null
         callback = onDone
         try {
             launcher.launch(i)
@@ -82,4 +95,12 @@ class ProfileOpClient(activity: ComponentActivity) {
             onDone(OpResult.CANCELED)
         }
     }
+}
+
+object ApkPaths {
+    /** Jalur APK aplikasi di profil utama: base + split (bila ada). Kosong bila tidak terbaca. */
+    fun of(ctx: Context, pkg: String): List<String> = runCatching {
+        val info = ctx.packageManager.getApplicationInfo(pkg, 0)
+        listOfNotNull(info.sourceDir) + (info.splitSourceDirs?.toList() ?: emptyList())
+    }.getOrDefault(emptyList())
 }

@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.nex.clone.core.ApkPaths
 import com.nex.clone.core.CloneItem
 import com.nex.clone.core.CloneItems
 import com.nex.clone.core.CloneStore
@@ -37,6 +38,7 @@ import com.nex.clone.core.Support
 import com.nex.clone.core.message
 import com.nex.clone.databinding.ActivityMainBinding
 import com.nex.clone.ui.Busy
+import com.nex.clone.ui.OpFeedback
 import com.nex.clone.ui.applySystemBarsPadding
 import com.nex.clone.ui.dp
 
@@ -229,16 +231,16 @@ class MainActivity : AppCompatActivity() {
         }
         val pkg = item.entry.pkg
         val busy = Busy.show(this, R.string.cloning)
-        ops.run(ProfileOps.OP_CLONE, listOf(pkg)) { r ->
+        ops.run(ProfileOps.OP_CLONE, listOf(pkg), ApkPaths.of(this, pkg)) { r ->
             busy.dismiss()
             if (r.isOk) {
                 CloneStore.upsert(item.entry)
                 CloneStore.addHistory(pkg)
                 Toast.makeText(this, R.string.clone_done, Toast.LENGTH_SHORT).show()
-                refresh()
             } else {
-                Toast.makeText(this, r.message(this, R.string.clone_failed), Toast.LENGTH_LONG).show()
+                OpFeedback.failed(this, r, ops.lastReason, R.string.clone_failed)
             }
+            refresh()
         }
     }
 
@@ -250,10 +252,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun repair(pkg: String) {
         val busy = Busy.show(this, R.string.repairing)
-        ops.run(ProfileOps.OP_REPAIR, listOf(pkg)) { r ->
+        ops.run(ProfileOps.OP_REPAIR, listOf(pkg), ApkPaths.of(this, pkg)) { r ->
             busy.dismiss()
-            val msg = if (r.isOk) getString(R.string.repair_done) else r.message(this, R.string.repair_failed)
-            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+            if (r.isOk) {
+                Toast.makeText(this, R.string.repair_done, Toast.LENGTH_LONG).show()
+            } else {
+                OpFeedback.failed(this, r, ops.lastReason, R.string.repair_failed)
+            }
             refresh()
         }
     }

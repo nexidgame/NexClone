@@ -13,7 +13,7 @@
     <string name="setup_title">Siapkan ruang klon</string>
     <string name="setup_desc">Nex Clone butuh membuat profil kerja Android sebagai tempat aplikasi klon berjalan terpisah dari aplikasi asli.</string>
     <string name="setup_button">Siapkan sekarang</string>
-    <string name="setup_explain">Nex Clone akan langsung membuat profil kerja Android sebagai ruang untuk aplikasi klon. Layar persetujuan sistem akan muncul; ikuti langkahnya.\n\nAplikasi di profil kerja memakai data dan akun yang terpisah dari aplikasi aslinya. Menghapus profil kerja akan menghapus semua datanya.</string>
+    <string name="setup_explain">Nex Clone akan langsung membuat profil kerja Android sebagai ruang untuk aplikasi yang Anda install. Layar persetujuan sistem akan muncul; ikuti langkahnya.\n\nAplikasi di profil kerja memakai data dan akun yang terpisah dari aplikasi aslinya. Menghapus profil kerja akan menghapus semua datanya.</string>
     <string name="setup_continue">Lanjutkan</string>
     <string name="setup_cancelled">Penyiapan dibatalkan.</string>
     <string name="setup_not_allowed_title">Tidak bisa menyiapkan</string>
@@ -38,7 +38,7 @@
     <string name="delete_failed">Klon tidak jadi dihapus.</string>
     <string name="pick_title">Pilih aplikasi</string>
     <string name="pick_search_hint">Cari aplikasi</string>
-    <string name="pick_cloned">Sudah di profil kerja</string>
+    <string name="pick_cloned">Sudah terinstal di profil kerja</string>
     <string name="pick_history">Riwayat penambahan</string>
     <string name="pick_clear_history">Hapus catatan</string>
     <string name="edit_title">Ubah nama/ikon</string>
@@ -46,13 +46,13 @@
     <string name="edit_icon_label">Ikon</string>
     <string name="edit_pick_icon">Pilih ikon</string>
     <string name="edit_reset_icon">Atur ulang</string>
-    <string name="edit_clone">Masukkan ke profil kerja</string>
+    <string name="edit_clone">Install ke profil kerja</string>
     <string name="edit_save">Simpan</string>
     <string name="edit_saved">Perubahan disimpan.</string>
     <string name="icon_failed">Gambar tidak bisa dipakai sebagai ikon.</string>
-    <string name="cloning">Memasukkan ke profil kerja…</string>
-    <string name="clone_done">Berhasil dimasukkan ke profil kerja.</string>
-    <string name="clone_failed">Gagal memasukkan ke profil kerja.</string>
+    <string name="cloning">Menginstal ke profil kerja…</string>
+    <string name="clone_done">Terinstal di profil kerja.</string>
+    <string name="clone_failed">Gagal menginstal ke profil kerja.</string>
     <string name="launch_failed">Aplikasi klon tidak bisa dibuka. Coba Perbaiki satu kunci.</string>
     <string name="auth_title">Verifikasi untuk melanjutkan</string>
     <string name="auth_unavailable">Atur kunci layar (PIN, pola, atau sidik jari) di ponsel dulu untuk memakai fitur ini.</string>
@@ -110,7 +110,7 @@
     <string name="faq_a5">Sebagian besar bisa. Aplikasi yang melarang berjalan di profil kerja, atau butuh layanan yang tidak ada di profil, bisa gagal. Coba menu Perbaiki satu kunci bila klon bermasalah.</string>
     <string name="faq_q6">Ruang klon tidak bisa disiapkan di ponsel saya.</string>
     <string name="faq_a6">Sebagian ponsel menonaktifkan profil kerja, atau sudah ada profil kerja dari aplikasi lain. Hapus profil kerja lama di pengaturan ponsel atau coba di ponsel lain.</string>
-    <string name="menu_add_profile">Masukkan ke profil kerja</string>
+    <string name="menu_add_profile">Install ke profil kerja</string>
     <string name="cd_in_profile">Ada di profil kerja</string>
     <string name="need_profile">Profil kerja belum siap. Siapkan dulu.</string>
     <string name="setup_auto">Membuat profil kerja…</string>
@@ -127,4 +127,7 @@
     <string name="ph_delete_confirm">Hapus profil kerja? Semua aplikasi di profil kerja dan datanya akan hilang permanen.</string>
     <string name="ph_delete_yes">Hapus</string>
     <string name="ph_delete_failed">Gagal menghapus profil kerja.</string>
+    <string name="install_failed_title">Gagal menginstal</string>
+    <string name="detail_fmt">Detail teknis: %1$s</string>
+    <string name="install_opened_store">Instalasi otomatis tidak berhasil. Play Store profil kerja dibuka: ketuk Instal di sana, lalu kembali ke Nex Clone.</string>
 </resources>

@@ -13,7 +13,7 @@
     <string name="setup_title">Set up the clone space</string>
     <string name="setup_desc">Nex Clone needs to create an Android work profile where cloned apps run separately from the originals.</string>
     <string name="setup_button">Set up now</string>
-    <string name="setup_explain">Nex Clone will create an Android work profile right away as the space for cloned apps. A system consent screen will appear; follow its steps.\n\nApps in the work profile use data and accounts separate from the original app. Deleting the work profile deletes all their data.</string>
+    <string name="setup_explain">Nex Clone will create an Android work profile right away as the space for apps you install. A system consent screen will appear; follow its steps.\n\nApps in the work profile use data and accounts separate from the original app. Deleting the work profile deletes all their data.</string>
     <string name="setup_continue">Continue</string>
     <string name="setup_cancelled">Setup was cancelled.</string>
     <string name="setup_not_allowed_title">Cannot set up</string>
@@ -38,7 +38,7 @@
     <string name="delete_failed">The clone was not deleted.</string>
     <string name="pick_title">Choose app</string>
     <string name="pick_search_hint">Search apps</string>
-    <string name="pick_cloned">Already in work profile</string>
+    <string name="pick_cloned">Already installed in work profile</string>
     <string name="pick_history">Recently added</string>
     <string name="pick_clear_history">Clear history</string>
     <string name="edit_title">Edit name/icon</string>
@@ -46,13 +46,13 @@
     <string name="edit_icon_label">Icon</string>
     <string name="edit_pick_icon">Choose icon</string>
     <string name="edit_reset_icon">Reset</string>
-    <string name="edit_clone">Add to work profile</string>
+    <string name="edit_clone">Install to work profile</string>
     <string name="edit_save">Save</string>
     <string name="edit_saved">Changes saved.</string>
     <string name="icon_failed">That image cannot be used as an icon.</string>
-    <string name="cloning">Adding to work profile…</string>
-    <string name="clone_done">Added to the work profile.</string>
-    <string name="clone_failed">Could not add to the work profile.</string>
+    <string name="cloning">Installing to work profile…</string>
+    <string name="clone_done">Installed in the work profile.</string>
+    <string name="clone_failed">Could not install to the work profile.</string>
     <string name="launch_failed">The cloned app could not be opened. Try One-key repair.</string>
     <string name="auth_title">Verify to continue</string>
     <string name="auth_unavailable">Set a screen lock (PIN, pattern or fingerprint) on your phone first to use this feature.</string>
@@ -110,7 +110,7 @@
     <string name="faq_a5">Most can. Apps that refuse to run in a work profile, or need services missing from the profile, may fail. Try One-key repair if a clone misbehaves.</string>
     <string name="faq_q6">The clone space cannot be set up on my phone.</string>
     <string name="faq_a6">Some phones disable work profiles, or another app already created one. Remove the old work profile in your phone settings or try another phone.</string>
-    <string name="menu_add_profile">Add to work profile</string>
+    <string name="menu_add_profile">Install to work profile</string>
     <string name="cd_in_profile">In work profile</string>
     <string name="need_profile">The work profile is not ready. Set it up first.</string>
     <string name="setup_auto">Creating work profile…</string>
@@ -127,4 +127,7 @@
     <string name="ph_delete_confirm">Delete the work profile? All apps in it and their data will be lost permanently.</string>
     <string name="ph_delete_yes">Delete</string>
     <string name="ph_delete_failed">Could not delete the work profile.</string>
+    <string name="install_failed_title">Install failed</string>
+    <string name="detail_fmt">Technical detail: %1$s</string>
+    <string name="install_opened_store">Automatic install did not work. The work-profile Play Store was opened: tap Install there, then return to Nex Clone.</string>
 </resources>

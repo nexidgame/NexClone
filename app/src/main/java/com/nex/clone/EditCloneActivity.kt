@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import com.nex.clone.core.ApkPaths
 import com.nex.clone.core.CloneEntry
 import com.nex.clone.core.CloneStore
 import com.nex.clone.core.IconUtils
@@ -14,6 +15,7 @@ import com.nex.clone.core.ProfileOps
 import com.nex.clone.core.message
 import com.nex.clone.databinding.ActivityEditBinding
 import com.nex.clone.ui.Busy
+import com.nex.clone.ui.OpFeedback
 import com.nex.clone.ui.applySystemBarsPadding
 
 /** "Ubah nama/ikon": dipakai sebelum mengkloning (tombol Klon) dan untuk mengubah klon yang ada. */
@@ -106,7 +108,7 @@ class EditCloneActivity : AppCompatActivity() {
         }
 
         val busy = Busy.show(this, R.string.cloning)
-        ops.run(ProfileOps.OP_CLONE, listOf(pkg)) { r ->
+        ops.run(ProfileOps.OP_CLONE, listOf(pkg), ApkPaths.of(this, pkg)) { r ->
             busy.dismiss()
             if (r.isOk) {
                 CloneStore.upsert(CloneEntry(pkg = pkg, name = customName, iconFile = pickedFile))
@@ -115,7 +117,7 @@ class EditCloneActivity : AppCompatActivity() {
                 setResult(RESULT_OK)
                 finish()
             } else {
-                Toast.makeText(this, r.message(this, R.string.clone_failed), Toast.LENGTH_LONG).show()
+                OpFeedback.failed(this, r, ops.lastReason, R.string.clone_failed)
             }
         }
     }

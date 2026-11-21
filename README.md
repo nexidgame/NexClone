@@ -16,8 +16,8 @@ Dua salinan Nex Clone terpasang: satu di profil utama (yang Anda pakai) dan satu
 1. **Pertama kali dibuka**, Nex Clone langsung membuat profil kerja (layar persetujuan sistem akan muncul sekali).
 2. **Beranda** menampilkan semua aplikasi bawaan ponsel. Yang sudah ada di profil kerja diberi lencana koper.
    Ketuk = buka (salinan profil kerja bila ada, kalau tidak aplikasi aslinya).
-3. **Memasukkan aplikasi ke profil kerja**: ketuk **＋** lalu pilih aplikasi (bisa ubah nama/ikon dulu), atau
-   **tahan** ikon di beranda lalu pilih **Masukkan ke profil kerja**.
+3. **Menginstal aplikasi ke profil kerja**: ketuk **＋** lalu pilih aplikasi (bisa ubah nama/ikon dulu), atau
+   **tahan** ikon di beranda lalu pilih **Install ke profil kerja**. Aplikasinya lalu muncul di profil kerja.
 4. **Di dalam profil kerja** (tab Kerja di peluncur), Nex Clone hanya menampilkan dua menu:
    **Perbaiki** (jalankan ulang penyiapan) dan **Hapus profil kerja**.
 
@@ -28,6 +28,15 @@ Dua salinan Nex Clone terpasang: satu di profil utama (yang Anda pakai) dan satu
   Umpan balik, Berbagi, Bahasa (Indonesia/English), Tentang Kami.
 - Pesan galat spesifik bila perintah ke profil kerja tidak sampai (NOT_FOUND / CANCELED / FAILED).
 - Tidak disertakan: VIP/langganan, Kode F, Migrasi VIP (butuh server & penagihan).
+
+## Cara instal ke profil kerja (bertingkat, mirip "Clone" di Island)
+Dijalankan oleh Nex Clone di dalam profil kerja, berurutan sampai ada yang berhasil:
+1. `installExistingPackage` — memasang salinan dari paket yang sudah ada di ponsel (tanpa unduh).
+2. `enableSystemApp` — untuk aplikasi sistem.
+3. Melepas pembatasan instal lalu mengulang langkah 1.
+4. `PackageInstaller` dari APK sumber (base + split) — muncul layar konfirmasi sistem di profil kerja.
+5. Membuka Play Store di profil kerja agar Anda menginstal manual.
+Bila gagal, dialog menampilkan alasan teknisnya (untuk diagnosis).
 
 ## Jika muncul "profil kerja belum siap" / gagal memasukkan aplikasi
 Perintah dari profil utama dikirim ke Nex Clone di profil kerja lewat cross-profile intent. Bila tidak sampai:
