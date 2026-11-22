@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.nex.clone.core.CloneStore
+import com.nex.clone.core.CloneItems
 import com.nex.clone.core.Profiles
 import com.nex.clone.core.Support
 import com.nex.clone.databinding.ActivityUserCenterBinding
@@ -46,11 +46,17 @@ class UserCenterActivity : AppCompatActivity() {
         super.onResume()
         val ready = Profiles.cloneUser(this) != null
         b.tvStatusTitle.setText(if (ready) R.string.uc_status_ready else R.string.uc_status_not_ready)
-        b.tvStatusDesc.text = if (ready) {
-            getString(R.string.uc_status_count, CloneStore.all().size)
-        } else {
-            getString(R.string.uc_status_hint)
+        if (!ready) {
+            b.tvStatusDesc.text = getString(R.string.uc_status_hint)
+            return
         }
+        // Hitung dari isi profil kerja yang sebenarnya (catatan yang sudah dihapus ikut dibersihkan).
+        Thread {
+            val n = CloneItems.load(this, false).size + CloneItems.load(this, true).size
+            runOnUiThread {
+                if (!isDestroyed) b.tvStatusDesc.text = getString(R.string.uc_status_count, n)
+            }
+        }.start()
     }
 
     private fun addRow(

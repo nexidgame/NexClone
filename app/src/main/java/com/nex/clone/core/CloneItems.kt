@@ -2,6 +2,9 @@ package com.nex.clone.core
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.LauncherActivityInfo
+import android.os.UserHandle
+import android.os.UserManager
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 
@@ -17,11 +20,30 @@ data class CloneItem(
 
 object CloneItems {
 
+    /**
+     * Menyamakan catatan klon dengan isi profil kerja yang sebenarnya: aplikasi yang sudah dihapus
+     * dari profil kerja (mis. lewat Pengaturan ponsel) ikut dibuang dari catatan. Dilewati bila
+     * daftar profil tidak bisa dipercaya (profil tidak ada, dijeda, atau hasilnya kosong).
+     */
+    private fun sync(ctx: Context, user: UserHandle?, snap: Map<String, LauncherActivityInfo>?) {
+        if (user == null || snap == null || snap.isEmpty()) return
+        val quiet = runCatching { ctx.getSystemService(UserManager::class.java).isQuietModeEnabled(user) }
+            .getOrDefault(false)
+        if (quiet) return
+        for (e in CloneStore.all()) {
+            if (!snap.containsKey(e.pkg)) {
+                IconUtils.delete(ctx, e.iconFile)
+                CloneStore.remove(e.pkg)
+            }
+        }
+    }
+
     /** Boleh dipanggil dari thread latar. [wantPrivate] memilih daftar utama atau Ruang Privasi. */
     fun load(ctx: Context, wantPrivate: Boolean): List<CloneItem> {
+        val pm = ctx.packageManager
         val user = Profiles.cloneUser(ctx)
         val snap = user?.let { Profiles.snapshot(ctx, it) }
-        val pm = ctx.packageManager
+        sync(ctx, user, snap)
         return CloneStore.all().filter { it.priv == wantPrivate }.map { e ->
             val info = snap?.get(e.pkg)
             val custom = IconUtils.loadCustom(ctx, e.iconFile)?.let { BitmapDrawable(ctx.resources, it) }
@@ -44,6 +66,7 @@ object CloneItems {
         val pm = ctx.packageManager
         val user = Profiles.cloneUser(ctx)
         val snap = user?.let { Profiles.snapshot(ctx, it) }
+        sync(ctx, user, snap)
         val store = CloneStore.all().associateBy { it.pkg }
         val launch = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
         val seen = HashSet<String>()
